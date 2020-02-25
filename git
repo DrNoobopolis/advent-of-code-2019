@@ -32,6 +32,8 @@ touch         //working directory
 -> git add    //staging area
 -> git commit //repository
 
+git remote rm origin
+
 git remote add origin https://github.com/DrNoobopolis/csit321-project.git
 git remote 
 git push -u origin master
