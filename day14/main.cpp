@@ -1,25 +1,28 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <string>
 #include <fstream>
+#include <sstream>
 
 struct chemical {
     int quantity;
-    std::string id;
+    std::string name;
 
     std::string to_string() {
-        return std::to_string(this->quantity) + " " + this->id;
+        return std::to_string(this->quantity) + " " + this->name;
     }
 
     chemical() {}
 
-    chemical(int quantity, std::string id) {
+    chemical(int quantity, std::string name) {
         this->quantity = quantity;
-        this->id = id;
+        this->name = name;
     }
 };
 
 struct reaction {
+
     chemical output;
     std::vector<chemical> input;
 
@@ -31,18 +34,56 @@ struct reaction {
     }
 
     reaction(std::string line) {
-        //stringstream
-        //read in each bit
+        std::stringstream ss(line);
 
-        //checkpoint here
+        std::vector<chemical> input;
+
+        char next;
+        while(next != '=') {
+            if(next == ',') {
+                next = ' ';
+            }
+
+            input.push_back(quantity_name(next, ss));
+        }
+
+        this->input = input;
+
+        ss >> next; //>
+
+        this->output = quantity_name(next, ss);
     }
 
     void print() {
-        for(chemical element : input) {
-            std::cout << element.to_string() << " ";
+        for(int i=0; i<input.size(); i++) { //input
+            std::cout << input[i].to_string();
+            if(input.size() > 1 && i < input.size()-1) {
+                std::cout << ",";
+            }
+            std::cout << " ";
         }
 
         std::cout << "=> " << output.to_string() << std::endl;
+    }
+
+private:
+    //reading thing using stringstream
+    //should only be used to assist constructor
+    chemical quantity_name(char &next, std::stringstream &ss) {
+        int quantity;
+        ss >> quantity; //quantity
+
+        std::string name;
+
+        while (!ss.eof() && next != ',' && next != '=') { //name
+            next = ' ';
+            ss >> next;
+            if (next != ' ' && next != ',' && next != '=') {
+                name += next;
+            }
+        }
+
+        return {quantity, name};
     }
 };
 
@@ -65,6 +106,7 @@ void read(std::vector<reaction> &catalogue) {
     read.open("../input.txt");
 
     std::string line;
+
     while(std::getline(read, line)) {
         catalogue.push_back(line);
     }
@@ -76,18 +118,34 @@ int main() {
     std::vector<reaction> catalogue;
     read(catalogue);
 
-    //
+    std::string name = "FUEL";
+    auto initial = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){return r.output.name == name;});
+    initial->print();
 
-    //reaction first({2, "A"}, {{9, "ORE"}});
-    //first.print();
+    name = initial->input[0].name;
+    initial = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){ return r.output.name == name;});
+    initial->print();
+
+    name = initial->input[0].name;
+    initial = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){ return r.output.name == name;});
+    initial->print();
+
+    //this sort of thing
 
     return 0;
 }
 
-//std::vector<chemical> input = {{1, "a"}};
-//input.push_back({1, "a"});
-
 /*
+for(reaction element : catalogue) {
+    element.print();
+}
+need to use find to find FUEL
+
+reaction first({2, "A"}, {{9, "ORE"}});
+first.print();
+
+---
+
 list of reactions - puzzle input
 
 input chemical -> output chemical (quantities)
