@@ -1,0 +1,44 @@
+
+/*
+intcode
+    day 2
+    day 5
+    day 7
+    day 9
+        day 11
+*/
+
+/*
+1002,4,3,4,33
+
+        ABCDE    ABC DE
+1002 -> 01002 -> 010 02
+
+DE - opcode 02 
+A - parameter mode of 1st parameter
+B - ...               2nd ...
+C - ...               3rd ...
+
+                             A B C
+parameters of 1002,4,3,4 are 4,3,4 
+
+parameter A (1st) is in position mode, and has value 4 -> intcode[4] = 33
+                                                     0 -> intcode[0] = 1002
+                                                     x -> intcode[x]
+
+parameter B (2nd) is in immediate mode, and has value 3 -> 3
+                                                      1 -> 1
+                                                      x -> x
+
+//02(intcode[4],3)->intcode[4] 
+//always returns in position mode
+
+1002,4,3,4,33 -> 1002,4,3,4,99
+*/
+
+/*
+parameter mode 2 - relative mode
+
+
+
+*/
