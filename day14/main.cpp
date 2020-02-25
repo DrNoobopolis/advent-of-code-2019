@@ -30,6 +30,13 @@ struct reaction {
         this->input = input;
     }
 
+    reaction(std::string line) {
+        //stringstream
+        //read in each bit
+
+        //checkpoint here
+    }
+
     void print() {
         for(chemical element : input) {
             std::cout << element.to_string() << " ";
@@ -39,36 +46,40 @@ struct reaction {
     }
 };
 
-int main() {
-    std::ifstream read;
-    read.open("input.txt");
-
+void diagnose(std::ifstream &read) {
     std::cout << "good() = " << read.good() << std::endl;
     std::cout << "eof() = " << read.eof() << std::endl;
-    std::cout << "fail() = " << read.fail() << std::endl;
+    std::cout << "fail() = " << read.fail() << std::endl; //cannot find file!
     std::cout << "bad() = " << read.bad() << std::endl;
+}
 
-    /*
+void locate() {
+    std::ofstream write;
+    write.open("where.txt");
+    write << "example text";
+    write.close();
+}
+
+void read(std::vector<reaction> &catalogue) {
+    std::ifstream read;
+    read.open("../input.txt");
+
     std::string line;
     while(std::getline(read, line)) {
-        std::cout << line << std::endl;
+        catalogue.push_back(line);
     }
-    */
 
     read.close();
+}
 
-    std::vector<std::string> container = {
-        "9 ORE => 2 A",
-        "8 ORE => 3 B",
-        "7 ORE => 5 C",
-        "3 A, 4 B => 1 AB",
-        "5 B, 7 C => 1 BC",
-        "4 C, 1 A => 1 CA",
-        "7 A, 1 E => 1 FUEL"
-    };
+int main() {
+    std::vector<reaction> catalogue;
+    read(catalogue);
 
-    reaction first({2, "A"}, {{9, "ORE"}});
-    first.print();
+    //
+
+    //reaction first({2, "A"}, {{9, "ORE"}});
+    //first.print();
 
     return 0;
 }
