@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <map>
 
 struct chemical {
     int quantity;
@@ -101,14 +102,15 @@ void locate() {
     write.close();
 }
 
-void read(std::vector<reaction> &catalogue) {
+void read(std::map<std::string, reaction> &catalogue) {
     std::ifstream read;
-    read.open("../input.txt");
+    read.open("../input2.txt");
 
     std::string line;
 
     while(std::getline(read, line)) {
-        catalogue.push_back(line);
+        reaction temp(line);
+        catalogue[temp.output.name] = temp;
     }
 
     read.close();
@@ -118,107 +120,29 @@ void scale(int &ofct, std::vector<reaction>::iterator init, int const ifct, std:
     while(init->output.quantity*ofct < temp->input[0].quantity*ifct) {
         ofct++;
     }
-    //return ofct;
 }
 
-/*
-2 AB, 3 BC, 4 CA => 1 FUEL
-    3 A, 4 B => 1 AB
-        9 ORE => 2 A
-
-    5 B, 7 C => 1 BC
-        8 ORE => 3 B
-
-    4 C, 1 A => 1 CA
-        7 ORE => 5 C
-*/
-
-/*
-2 AB, 3 BC, 4 CA => 1 FUEL
-    3 A, 4 B => 1 AB
-        9 ORE => 2 A
-        8 ORE => 3 B
-*/
-
-void tree(int counter, std::vector<reaction> &catalogue, std::vector<reaction>::iterator old) {
-    auto crnt = std::find_if(catalogue.begin(), catalogue.end(), [old, counter](reaction r){return r.output.name == old->input[counter].name;});
-
-    old->print(1);
-    crnt->print(1);
-    //std::cout << counter << std::endl;
-    std::cout << std::endl;
-
-    //int factor = 1;
-
-    if(crnt->input.size() == 1 && crnt->input[counter].name == "ORE") {
-        return;
+void print(std::map<std::string, reaction> catalogue) {
+    auto it = catalogue.begin();
+    while (it != catalogue.end()) {
+        it->second.print(1);
+        it++;
     }
-    else {
-        tree(0, catalogue, crnt);
-    }
-
-    if(counter < old->input.size()-1) {
-        counter++;
-        tree(counter, catalogue, crnt);
-    }
-
-    return;
 }
 
 int main() {
-    std::vector<reaction> catalogue;
+    std::map<std::string, reaction> catalogue;
     read(catalogue);
+
+    print(catalogue);
+
+    //catalogue["A"].print(1);
+
+
     int counter = 0;
 
-    auto init = std::find_if(catalogue.begin(), catalogue.end(), [](reaction r){return r.output.name == "FUEL";});
-    tree(0, catalogue, init);
-
-    /*
-    std::string name = "FUEL";
-    auto crnt = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){return r.output.name == name;});
-    crnt->print(1);
-
-    auto old = crnt;
-    name = crnt->input[0].name;
-    crnt = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){ return r.output.name == name;});
-
-    int ifct = 1;
-    int ofct = 1;
-    scale(ifct, crnt, ofct, old);
-    crnt->print(ifct);
-
-    old = crnt;
-    name = crnt->input[0].name;
-    crnt = std::find_if(catalogue.begin(), catalogue.end(), [name](reaction r){ return r.output.name == name;});
-
-    ofct = ifct;
-    ifct = 1;
-    scale(ifct, crnt, ofct, old);
-    crnt->print(ifct);
-
-    //Pre Order Traversal: Root, Left, Right.
-    */
+    //auto init = std::find_if(catalogue.begin(), catalogue.end(), [](reaction r){return r.output.name == "FUEL";});
+    //tree(0, catalogue, init);
 
     return 0;
 }
-
-/*
-for(reaction element : catalogue) {
-    element.print();
-}
-need to use find to find FUEL
-
-reaction first({2, "A"}, {{9, "ORE"}});
-first.print();
-
----
-
-list of reactions - puzzle input
-
-input chemical -> output chemical (quantities)
-
-ORE is input only
-While others are only
-
-ORE -> FUEL
-*/
