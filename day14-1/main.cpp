@@ -9,16 +9,16 @@
 //#include <queue>
 
 struct chemical {
-    int quantity;
+    long quantity;
     std::string name;
 
-    std::string to_string(int factor) {
+    std::string to_string(long factor) {
         return std::to_string(this->quantity*factor) + " " + this->name;
     }
 
     chemical() {}
 
-    chemical(int quantity, std::string name) {
+    chemical(long quantity, std::string name) {
         this->quantity = quantity;
         this->name = name;
     }
@@ -57,8 +57,8 @@ struct reaction {
         this->output = quantity_name(next, ss);
     }
 
-    void print(int factor) {
-        for(int i=0; i<input.size(); i++) { //input
+    void prlong(long factor) {
+        for(long i=0; i<input.size(); i++) { //input
             std::cout << input[i].to_string(factor);
             if(input.size() > 1 && i < input.size()-1) {
                 std::cout << ",";
@@ -73,7 +73,7 @@ private:
     //reading thing using stringstream
     //should only be used to assist constructor
     chemical quantity_name(char &next, std::stringstream &ss) {
-        int quantity;
+        long quantity;
         ss >> quantity; //quantity
 
         std::string name;
@@ -118,21 +118,22 @@ void read(std::map<std::string, reaction> &catalogue) {
     read.close();
 }
 
-void scale(int &ofct, std::vector<reaction>::iterator init, int const ifct, std::vector<reaction>::iterator temp) {
+void scale(long &ofct, std::vector<reaction>::iterator init, long const ifct, std::vector<reaction>::iterator temp) {
     while(init->output.quantity*ofct < temp->input[0].quantity*ifct) {
         ofct++;
     }
 }
 
-void print(std::map<std::string, reaction> catalogue) {
+void prlong(std::map<std::string, reaction> catalogue) {
     auto it = catalogue.begin();
     while (it != catalogue.end()) {
-        it->second.print(1);
+        it->second.prlong(1);
         it++;
     }
 }
 
-void DFSUtil(int &ORE, double quantity, std::map<std::string, reaction> graph, std::map<std::string, int> &excess, reaction start, std::map<std::string, bool> &visited) {
+void DFSUtil(long &ORE, double quantity, std::map<std::string, reaction> graph, std::map<std::string, long> excess, reaction start, std::map<std::string, bool> &visited) {
+    std::cout << ORE << std::endl;
 
     double factor;
 
@@ -146,7 +147,7 @@ void DFSUtil(int &ORE, double quantity, std::map<std::string, reaction> graph, s
             factor++;
         }
 
-        //start.print(factor);
+        //start.prlong(factor);
 
         if(start.output.quantity*factor > quantity) { //need to collect excess
             //std::cout << "   " << start.output.name << " " << start.output.quantity*factor-quantity << std::endl;
@@ -154,7 +155,7 @@ void DFSUtil(int &ORE, double quantity, std::map<std::string, reaction> graph, s
         }
 
         if(start.input.size() == 1 && start.input[0].name == "ORE") {
-            //start.print(factor);
+            //start.prlong(factor);
             ORE += start.input[0].quantity*factor;
         }
     }
@@ -167,14 +168,14 @@ void DFSUtil(int &ORE, double quantity, std::map<std::string, reaction> graph, s
     }
 }
 
-std::map<std::string, int>::iterator exists(std::map<std::string, int> &excess, std::map<std::string, reaction> graph) {
+std::map<std::string, long>::iterator exists(std::map<std::string, long> &excess, std::map<std::string, reaction> graph) {
     auto it = excess.begin();
 
     for(; it != excess.end(); it++) {
         //.find() method is better as it returns an iterator
         //cannot exist outside of scope of map
         if(graph.find(it->first)->second.output.quantity <= it->second && graph.find(it->first) != graph.end()) {
-            //std::cout << graph[it->first].output.quantity << " " << it->second << std::endl;
+            //std::cout << it->first << " " << graph[it->first].output.quantity << " " << it->second << std::endl;
             return it;
         }
     }
@@ -182,20 +183,29 @@ std::map<std::string, int>::iterator exists(std::map<std::string, int> &excess, 
     return excess.end();
 }
 
-int refund(std::map<std::string, int> &excess, std::map<std::string, reaction> graph) {
-    int ORE = 0;
+void prlong(std::map<std::string, long> excess) {
+    for(auto element : excess) {
+        std::cout << element.first << " " << element.second << std::endl;
+    }
+}
+
+long refund(std::map<std::string, long> &excess, std::map<std::string, reaction> graph) {
+    long ORE = 0;
 
     while(exists(excess, graph) != excess.end()) {
-        int factor = 1;
+        long factor = 1;
 
         auto it = exists(excess, graph);
 
-        while(graph[it->first].output.quantity*factor <= it->second) { //ugly
+        while(graph.find(it->first)->second.output.quantity*factor <= it->second) { //ugly method...
             factor++;
         }
         factor--;
 
+        std::cout << "a" << std::endl;
+
         it->second -= graph[it->first].output.quantity*factor;
+        std::cout << factor << std::endl;
 
         for(auto element : graph[it->first].input) {
             excess[element.name] += element.quantity*factor;
@@ -205,6 +215,8 @@ int refund(std::map<std::string, int> &excess, std::map<std::string, reaction> g
     return excess["ORE"];
 }
 
+
+
 void DFS(std::map<std::string, reaction> graph) {
     // mark all the vertices as not visited
     std::map<std::string, bool> visited;
@@ -212,18 +224,22 @@ void DFS(std::map<std::string, reaction> graph) {
         visited[it->first] = false;
 
     // collect excess and convert back to ORE where possible
-    std::map<std::string, int> excess;
+    std::map<std::string, long> excess;
     for (auto it = graph.begin(); it != graph.end(); it++)
         visited[it->first] = 0;
 
-    int ORE = 0;
+    long ORE = 0;
 
     // call the recursive helper function
     DFSUtil(ORE, 1, graph, excess, graph["FUEL"], visited);
 
-    //std::cout << std::endl;
+    //std::cout << ORE << std::endl;
 
-    int savings = refund(excess, graph);
+    //gets stuck inside refund() method
+
+    long savings = refund(excess, graph);
+
+    //prlong(excess);
 
     std::cout << ORE - savings << std::endl;
 }
@@ -247,7 +263,10 @@ int main() {
 
     DFS(graph);
 
-    //print(catalogue);
+    //prlong(catalogue);
+
+    //> 1000000000000/337862
+
 
     return 0;
 }

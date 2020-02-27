@@ -1,0 +1,19 @@
+BHXH 15
+BMBT 8
+CNZTR 13
+FHTLT 5
+KTJDG 24
+LTCX 9
+MZWV 18
+PLWSL 1
+RJRHP 7
+VRPVC 66
+WPTQ 5
+XCVML 16
+XDBXC 4
+ZLQW 9
+
+//make an excess.cpp that deals with this
+//hard code the input initially
+
+//
