@@ -1,10 +1,12 @@
 #include <iostream>
 #include <vector>
-#include <algorithm>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <map>
+//#include <algorithm>
+//#include <stack>
+//#include <queue>
 
 struct chemical {
     int quantity;
@@ -104,7 +106,7 @@ void locate() {
 
 void read(std::map<std::string, reaction> &catalogue) {
     std::ifstream read;
-    read.open("../input2.txt");
+    read.open("../input.txt");
 
     std::string line;
 
@@ -130,19 +132,122 @@ void print(std::map<std::string, reaction> catalogue) {
     }
 }
 
+void DFSUtil(int &ORE, double quantity, std::map<std::string, reaction> graph, std::map<std::string, int> &excess, reaction start, std::map<std::string, bool> &visited) {
+
+    double factor;
+
+    if (start.input.size() != 0)
+    {
+        visited[start.output.name] = true;
+
+        factor = 1;
+
+        while(start.output.quantity*factor < quantity) {
+            factor++;
+        }
+
+        //start.print(factor);
+
+        if(start.output.quantity*factor > quantity) { //need to collect excess
+            //std::cout << "   " << start.output.name << " " << start.output.quantity*factor-quantity << std::endl;
+            excess[start.output.name] += start.output.quantity*factor-quantity;
+        }
+
+        if(start.input.size() == 1 && start.input[0].name == "ORE") {
+            //start.print(factor);
+            ORE += start.input[0].quantity*factor;
+        }
+    }
+
+    // recur
+    for (auto it = graph[start.output.name].input.begin(); it != graph[start.output.name].input.end(); ++it)
+    {
+        //if (!visited[it->name])
+        DFSUtil(ORE, it->quantity*factor, graph, excess, graph[it->name], visited);
+    }
+}
+
+std::map<std::string, int>::iterator exists(std::map<std::string, int> &excess, std::map<std::string, reaction> graph) {
+    auto it = excess.begin();
+
+    for(; it != excess.end(); it++) {
+        //.find() method is better as it returns an iterator
+        //cannot exist outside of scope of map
+        if(graph.find(it->first)->second.output.quantity <= it->second && graph.find(it->first) != graph.end()) {
+            //std::cout << graph[it->first].output.quantity << " " << it->second << std::endl;
+            return it;
+        }
+    }
+
+    return excess.end();
+}
+
+int refund(std::map<std::string, int> &excess, std::map<std::string, reaction> graph) {
+    int ORE = 0;
+
+    while(exists(excess, graph) != excess.end()) {
+        int factor = 1;
+
+        auto it = exists(excess, graph);
+
+        while(graph[it->first].output.quantity*factor < it->second) {
+            factor++;
+        }
+        factor--;
+
+        it->second -= graph[it->first].output.quantity*factor;
+
+        for(auto element : graph[it->first].input) {
+            excess[element.name] += element.quantity*factor;
+        }
+    }
+
+    return excess["ORE"];
+}
+
+void DFS(std::map<std::string, reaction> graph) {
+    // mark all the vertices as not visited
+    std::map<std::string, bool> visited;
+    for (auto it = graph.begin(); it != graph.end(); it++)
+        visited[it->first] = false;
+
+    // collect excess and convert back to ORE where possible
+    std::map<std::string, int> excess;
+    for (auto it = graph.begin(); it != graph.end(); it++)
+        visited[it->first] = 0;
+
+    int ORE = 0;
+
+    // call the recursive helper function
+    DFSUtil(ORE, 1, graph, excess, graph["FUEL"], visited);
+
+    //std::cout << std::endl;
+
+    int savings = refund(excess, graph);
+
+    std::cout << ORE - savings << std::endl;
+}
+
+/*
+tree search
+    depth first search
+    breadth first search
+
+tree traversal
+    depth first traversals
+        inorder (left, root, right)
+        preorder (root, left, right)
+        postorder (left, right, root)
+    breadth first traversal
+*/
+
 int main() {
-    std::map<std::string, reaction> catalogue;
-    read(catalogue);
+    std::map<std::string, reaction> graph;
+    read(graph);
 
-    print(catalogue);
+    DFS(graph);
 
-    //catalogue["A"].print(1);
-
-
-    int counter = 0;
-
-    //auto init = std::find_if(catalogue.begin(), catalogue.end(), [](reaction r){return r.output.name == "FUEL";});
-    //tree(0, catalogue, init);
+    //print(catalogue);
 
     return 0;
 }
