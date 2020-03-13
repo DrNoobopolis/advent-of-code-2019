@@ -185,8 +185,13 @@ long refund(std::map<std::string, long> &excess, std::map<std::string, reaction>
 
         auto it = exists(excess, graph);
 
-        while(graph[it->first].output.quantity*factor <= it->second) { //ugly
-            factor++;
+        while(graph[it->first].output.quantity*factor <= it->second) { //ugly and slow!
+            factor++; //I think I could do the same thing with a /
+            //need to check what the logic looks like though
+            //should probably pull down the old code as a backup
+
+            //saved in my downloads folder and working!
+
         }
         factor--;
 
@@ -200,7 +205,7 @@ long refund(std::map<std::string, long> &excess, std::map<std::string, reaction>
     return excess["ORE"];
 }
 
-void DFS(std::map<std::string, reaction> graph) {
+std::map<std::string, long> DFS(std::map<std::string, reaction> graph) {
     // mark all the vertices as not visited
     std::map<std::string, bool> visited;
     for (auto it = graph.begin(); it != graph.end(); it++)
@@ -217,10 +222,11 @@ void DFS(std::map<std::string, reaction> graph) {
     DFSUtil(ORE, 1, graph, excess, graph["FUEL"], visited);
 
     //std::cout << std::endl;
+    //long savings = refund(excess, graph);
 
-    long savings = refund(excess, graph);
+    return excess;
 
-    std::cout << ORE - savings << std::endl;
+    //std::cout << ORE - savings << std::endl;
 }
 
 /*
@@ -240,7 +246,36 @@ int main() {
     std::map<std::string, reaction> graph;
     read(graph);
 
-    DFS(graph);
+    long ORE = 1000000000000;
+    long cost = 13312;
+    long FUEL = ORE/cost;
+
+    auto excess = DFS(graph);
+    for(auto &element : excess) {
+        //std::cout << element.first << " " << element.second << std::endl;
+        element.second *= FUEL;
+        std::cout << element.first << " " << element.second << std::endl;
+    }
+
+    long unused = ORE - (FUEL*cost);
+
+    long saving = refund(excess, graph);
+
+    //my stratergy is simply to recover as much ORE as possible and see how much fuel I can make
+    //then use the leftovers and give it another whirl until all the fuel is used up
+
+    //
+    for(auto &element : excess) {
+        std::cout << element.first << " " << element.second << std::endl;
+    }
+
+    //long remaining_ORE = unused + saving;
+
+    //remaining_ORE = 337862; //337862
+
+    //std::cout << saving << std::endl;
+
+    //106744
 
     //prlong(catalogue);
 
