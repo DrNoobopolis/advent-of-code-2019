@@ -10,12 +10,15 @@
 
 int main()
 {
-    program single;
+    std::vector<long> source_code = {104, 0};
+    program single(source_code);
 
-    std::vector<int> pinball;
+    std::vector<int> output;
+    single.run(output);
 
-    single.run(pinball);
+    // x_position, y_position, tile_id
 
+    /*
     int max_x = 0, max_y = 0, counter = 0;
 
     for (auto element : pinball) //what is this about?
@@ -46,10 +49,11 @@ int main()
 
     int ans = 0; // what is this calculating?
 
-    int x, y;
     counter = 0;
     for (auto element : pinball)
     {
+        int x, y;
+
         if (counter == 0)
         {
             x = element;
@@ -84,4 +88,5 @@ int main()
     }
 
     std::cout << ans << std::endl;
+    */
 }

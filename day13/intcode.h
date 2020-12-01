@@ -15,7 +15,10 @@ private:
 
 public:
     long get_duration();
+
     program();
+    program(std::vector<long> &);
+
     void run(std::vector<int> &);
 };
 
