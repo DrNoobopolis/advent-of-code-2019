@@ -1,20 +1,32 @@
 
 #include <iostream>
-#include <fstream>
 #include <vector>
-#include <math.h>
-#include <algorithm>
-#include <array>
 
-#include "intcode.h"
+#include "intcode.hpp"
+
+// does not stop it?
+// how can we do an unsafe exit?
+// write a testing module using constexpr and static assert
+// to do
+// not safe should throw an exception?
 
 int main()
 {
-    std::vector<long> source_code = {104, 0};
+    std::vector<int> source_code = {104, 100, 99};
+
     program single(source_code);
+
+    // &source_code[0] == NULL
 
     std::vector<int> output;
     single.run(output);
+
+    for (auto e : output)
+        std::cout << e << '\n';
+
+    static_assert(10 == 10, "");
+
+    //
 
     // x_position, y_position, tile_id
 
