@@ -1,6 +1,4 @@
-# Documentation
-
-Intcode
+# Intcode
 
 - 2
 - 5
