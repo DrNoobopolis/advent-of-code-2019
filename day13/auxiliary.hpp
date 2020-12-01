@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 std::vector<int> read(std::string const file_name)
 {
@@ -33,8 +34,10 @@ int safe_access(std::vector<int> &vector, int const index, std::size_t const siz
     {
         return vector[index];
     }
-
-    std::cerr << "index greater than vector size" << '\n'; // does not stop it
-
-    return 0;
+    else
+    {
+        std::cerr << "index greater than vector size" << '\n';
+        exit(EXIT_FAILURE);
+        return 0;
+    }
 }

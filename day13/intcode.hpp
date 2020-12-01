@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <memory>
 #include <utility>
+#include <cstdlib>
 
 struct program
 {
@@ -112,8 +113,9 @@ void program::run(std::vector<int> &output)
             iterator = intcode.size();
             return;
 
-        default:                                                          //error
-            std::cerr << "intcode unkown: " << intcode[iterator] << '\n'; // does not stop it
+        default: //error
+            std::cerr << "opcode unkown: " << intcode[iterator] % 100 << '\n';
+            exit(EXIT_FAILURE);
             return;
         }
     }
@@ -142,7 +144,8 @@ int program::find(int const _iterator, int const _offset)
     }
     else
     {
-        std::cerr << "mode unknown" << '\n'; // does not stop it
-        return -1;
+        std::cerr << "mode unknown: " << mode << '\n';
+        exit(EXIT_FAILURE);
+        return 0;
     }
 }
