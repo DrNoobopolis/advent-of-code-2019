@@ -9,7 +9,43 @@
 #include <cstdlib>
 #include <math.h>
 
-void display(std::vector<int> screen_changes)
+// valgrind
+// gdb
+// ASan/MSan - never seen this before
+
+/*
+debugging 
+
+clang++ -g main.cpp
+
+valgrind --tool=memcheck --vgdb=yes --vgdb-error=0 ./a.out 
+
+[new terminal window]
+
+gdb ./a.out
+
+target remote | /usr/lib/valgrind/../../bin/vgdb --pid=34714
+
+detach
+
+target remote | /usr/lib/valgrind/../../bin/vgdb --pid=34714
+
+p x_coordinates[i] 
+*/
+
+/*
+todo 
+
+make the game more playable
+
+fix the scoring
+
+make moving easier 
+
+draw the grid in place
+*/
+
+void display(std::vector<int> const &screen_changes)
 {
     std::vector<int> x_coordinates, y_coordinates, tile_ids;
 
@@ -33,9 +69,36 @@ void display(std::vector<int> screen_changes)
     for (auto &row : arcade_cabinet)
         row.resize(35);
 
+    if (x_coordinates.size() != y_coordinates.size() || y_coordinates.size() != tile_ids.size())
+    {
+        std::cerr << "These vectors should be the same length" << '\n';
+        exit(EXIT_FAILURE);
+    }
+
     for (int i = 0; i < x_coordinates.size(); i++)
     {
-        arcade_cabinet[y_coordinates[i]][x_coordinates[i]] = tile_ids[i];
+        if (x_coordinates[i] == -1 && y_coordinates[i] == 0)
+        {
+            std::cout << "score: " << tile_ids[i] << '\n';
+
+            // I do not understand why erase is not working
+        }
+        else if (x_coordinates[i] >= 0 && y_coordinates[i] >= 0 && tile_ids[i] >= 0)
+        {
+            arcade_cabinet[y_coordinates[i]][x_coordinates[i]] = tile_ids[i];
+        }
+        else
+        {
+            std::cerr << "Attempt to access negative vector index" << '\n';
+
+            std::cerr
+                << "i: " << i << '\n'
+                << "x_coordinates: " << x_coordinates[i] << '\n'
+                << "y_coordinates: " << y_coordinates[i] << '\n'
+                << "tile_ids: " << tile_ids[i] << '\n';
+
+            exit(EXIT_FAILURE);
+        }
     }
 
     for (auto row : arcade_cabinet)
@@ -46,6 +109,12 @@ void display(std::vector<int> screen_changes)
             {
             case 0:
                 std::cout << " ";
+                break;
+            case 1:
+                std::cout << "█";
+                break;
+            case 2:
+                std::cout << "■";
                 break;
             default:
                 std::cout << pixel;
