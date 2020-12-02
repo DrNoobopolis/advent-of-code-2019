@@ -1,104 +1,38 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include "intcode.hpp"
-
-// does not stop it?
-// how can we do an unsafe exit?
-// write a testing module using constexpr and static assert
-// to do
-// not safe should throw an exception?
+#include "auxiliary.hpp"
 
 int main()
 {
-    std::vector<int> source_code = {104, 100, 99};
+    std::vector<int> source_code = read("input.txt");
 
-    program single(source_code);
+    program program(source_code);
 
     // &source_code[0] == NULL
 
-    std::vector<int> output;
-    single.run(output);
-
-    for (auto e : output)
-        std::cout << e << '\n';
-
-    static_assert(10 == 10, "");
-
-    //
-
-    // x_position, y_position, tile_id
-
-    /*
-    int max_x = 0, max_y = 0, counter = 0;
-
-    for (auto element : pinball) //what is this about?
-    {
-        if (counter == 0)
-        {
-            if (element > max_x)
-            {
-                max_x = element;
-            }
-        }
-        else if (counter == 1)
-        {
-            if (element > max_y)
-            {
-                max_y = element;
-            }
-        }
-        counter++;
-        if (counter == 3)
-        {
-            counter = 0;
-        }
-    }
-
-    std::vector<std::vector<int>> screen(max_y);
-    std::fill(screen.begin(), screen.end(), std::vector<int>(max_x));
-
-    int ans = 0; // what is this calculating?
-
-    counter = 0;
-    for (auto element : pinball)
-    {
-        int x, y;
-
-        if (counter == 0)
-        {
-            x = element;
-        }
-        else if (counter == 1)
-        {
-            y = element;
-        }
-        else if (counter == 2)
-        {
-            screen[y][x] = element;
-
-            if (element == 2)
-            {
-                ans++;
-            }
-        }
-        counter++;
-        if (counter == 3)
-        {
-            counter = 0;
-        }
-    }
-
-    for (int yi = 0; yi < max_y; yi++)
-    {
-        for (int xi = 0; xi < max_x; xi++)
-        {
-            std::cout << screen[yi][xi] << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << ans << std::endl;
-    */
+    program.run();
 }
+
+// write a testing module using constexpr and static assert
+
+// using exceptions?
+
+// unit tests
+
+// 1,0,0,0,99
+// 2,0,0,0,99
+
+// 2,3,0,3,99
+// 2,3,0,6,99
+
+// 2,4,4,5,99,0
+// 2,4,4,5,99,9801
+
+// 1,1,1,4,99,5,6,0,99
+// 30,1,1,4,2,5,6,0,99
+
+// static_assert(10 == 10, "");
