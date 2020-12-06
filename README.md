@@ -1,12 +1,12 @@
 # Intcode
 
-- 2
-- 5
-- 7
-- 9
-- 11
-- 13
-- 15
+- 2 completed
+- 5 completed
+- 7 completed
+- 9 completed
+- 11 completed
+- 13 current 13b
+- 15 not started
 - 17
 - 19
 - 21

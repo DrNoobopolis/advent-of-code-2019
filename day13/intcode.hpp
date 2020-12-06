@@ -172,6 +172,8 @@ std::vector<int> program::run()
         case 3: //input
             display(screen_changes);
 
+            //screen_changes.clear();
+
             int input;
             std::cin >> input;
             intcode[valid_index(find(iterator, 1))] = input;
