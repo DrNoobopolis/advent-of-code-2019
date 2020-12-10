@@ -9,99 +9,115 @@
 #include <cstdlib>
 #include <math.h>
 
-// valgrind
-// gdb
-// ASan/MSan - never seen this before
-
 /*
+valgrind
+gdb
+ASan/MSan - never seen this before
+
 debugging 
-
 clang++ -g main.cpp
-
 valgrind --tool=memcheck --vgdb=yes --vgdb-error=0 ./a.out 
-
 [new terminal window]
-
 gdb ./a.out
-
 target remote | /usr/lib/valgrind/../../bin/vgdb --pid=34714
-
 detach
-
 target remote | /usr/lib/valgrind/../../bin/vgdb --pid=34714
-
 p x_coordinates[i] 
+
+start building models for refactoring?
+
+using patterns to change between human and bot mode?
 */
 
-/*
-todo 
-
-make the game more playable
-
-fix the scoring
-
-make moving easier 
-
-draw the grid in place
-*/
-
-void display(std::vector<int> const &screen_changes)
+enum class intcode_operations
 {
-    std::vector<int> x_coordinates, y_coordinates, tile_ids;
+    add,
+    multiply,
+    input,
+    output,
+    jump_if_true,
+    jump_if_false,
+    less_than,
+    equals,
+    adjusts_the_relative_base, // are you sure about that?
+    hault,
+    error
+};
+
+class arcade_cabinet
+{
+private:
+    std::vector<std::vector<int>> screen;
+
+    int score;
+
+public:
+    int next_move();
+
+    arcade_cabinet();
+
+    void update(std::vector<int>);
+
+    void print_score()
+    {
+        std::cout << score << '\n';
+    }
+
+    void display();
+};
+
+void arcade_cabinet::update(std::vector<int> screen_changes)
+{
+    if (screen_changes.size() % 3 != 0)
+    {
+        std::cerr << "Unexpected length" << '\n';
+        exit(EXIT_FAILURE);
+    }
+
+    int x_position, y_position, value;
 
     for (int i = 0; i < screen_changes.size(); i++)
     {
         switch (i % 3)
         {
         case 0:
-            x_coordinates.push_back(screen_changes[i]);
+            x_position = screen_changes[i];
             break;
         case 1:
-            y_coordinates.push_back(screen_changes[i]);
+            y_position = screen_changes[i];
             break;
         case 2:
-            tile_ids.push_back(screen_changes[i]);
+            value = screen_changes[i];
+
+            if (x_position == -1 && y_position == 0)
+            {
+                this->score = value;
+            }
+            else if (x_position < 0 || y_position < 0 || value < 0 || value > 4)
+            {
+                std::cerr << "Unexpected value" << '\n';
+                exit(EXIT_FAILURE);
+            }
+            else
+            {
+                this->screen[y_position][x_position] = value;
+            }
+
             break;
         }
     }
+}
 
-    std::vector<std::vector<int>> arcade_cabinet(23);
-    for (auto &row : arcade_cabinet)
+arcade_cabinet::arcade_cabinet()
+{
+    this->screen.resize(23);
+    for (auto &row : this->screen)
         row.resize(35);
+}
 
-    if (x_coordinates.size() != y_coordinates.size() || y_coordinates.size() != tile_ids.size())
-    {
-        std::cerr << "These vectors should be the same length" << '\n';
-        exit(EXIT_FAILURE);
-    }
-
-    for (int i = 0; i < x_coordinates.size(); i++)
-    {
-        if (x_coordinates[i] == -1 && y_coordinates[i] == 0)
-        {
-            std::cout << "score: " << tile_ids[i] << '\n';
-
-            // I do not understand why erase is not working
-        }
-        else if (x_coordinates[i] >= 0 && y_coordinates[i] >= 0 && tile_ids[i] >= 0)
-        {
-            arcade_cabinet[y_coordinates[i]][x_coordinates[i]] = tile_ids[i];
-        }
-        else
-        {
-            std::cerr << "Attempt to access negative vector index" << '\n';
-
-            std::cerr
-                << "i: " << i << '\n'
-                << "x_coordinates: " << x_coordinates[i] << '\n'
-                << "y_coordinates: " << y_coordinates[i] << '\n'
-                << "tile_ids: " << tile_ids[i] << '\n';
-
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    for (auto row : arcade_cabinet)
+void arcade_cabinet::display()
+{
+    for (auto row : this->screen)
     {
         for (auto pixel : row)
         {
@@ -126,7 +142,52 @@ void display(std::vector<int> const &screen_changes)
     }
 }
 
-struct program
+// the default destructor works fine unless we have dynamically allocated memory or pointer in class
+
+class Actor
+{
+public:
+    virtual void output() = 0; // pure virtual interface
+    virtual void input() = 0;  // pure virtual interface
+};
+
+/*
+class User implements Actor
+{
+public:
+    void output;
+    void input;
+};
+*/
+
+int index_x(std::vector<std::vector<int>> table, int target)
+{
+    for (std::vector<int> row : table)
+    {
+        auto const target_find = find(row.begin(), row.end(), target);
+        bool const target_found = target_find != row.end();
+
+        if (target_found)
+            return row.end() - target_find;
+    }
+
+    return -1;
+}
+
+//
+
+int arcade_cabinet::next_move()
+{
+    int const paddle_x = index_x(this->screen, 3);
+    int const ball_x = index_x(this->screen, 4);
+
+    // assumes paddle_x and ball_x are found
+    // assumes paddle_x - ball_x in {-1, 0, 1}
+
+    return paddle_x - ball_x;
+}
+
+class program
 {
 private:
     std::vector<int> intcode; // does this need to be int?
@@ -135,6 +196,7 @@ private:
     int find(int, int);
     int valid_index(int);
     std::vector<int> screen_changes;
+    arcade_cabinet game;
 
 public:
     program(std::vector<int>);
@@ -145,9 +207,7 @@ program::program(std::vector<int> const source_code)
 {
     intcode = source_code;
     intcode.resize(100000);
-
-    // intcode.push_back(10);
-    // std::move()
+    std::cout << '\n';
 }
 
 std::vector<int> program::run()
@@ -156,7 +216,7 @@ std::vector<int> program::run()
     {
         int const opcode = intcode[valid_index(iterator)] % 100;
 
-        switch (opcode)
+        switch (opcode) // should be an enum class
         {
 
         case 1: //add
@@ -170,18 +230,29 @@ std::vector<int> program::run()
             break;
 
         case 3: //input
-            display(screen_changes);
+            //int input;
+            //std::cin >> input;
+            //intcode[valid_index(find(iterator, 1))] = input;
 
-            //screen_changes.clear();
+            this->game.display();
+            std::cout << '\n';
 
-            int input;
-            std::cin >> input;
-            intcode[valid_index(find(iterator, 1))] = input;
+            //std::cout << "\x1B[25F";
+
+            intcode[valid_index(find(iterator, 1))] = this->game.next_move();
+
             iterator += 2;
             break;
 
         case 4: //output
-            screen_changes.push_back(intcode[valid_index(find(iterator, 1))]);
+            this->screen_changes.push_back(intcode[valid_index(find(iterator, 1))]);
+
+            if (this->screen_changes.size() % 3 == 0)
+            {
+                this->game.update(this->screen_changes);
+                screen_changes.clear();
+            }
+
             iterator += 2;
             break;
 
@@ -237,6 +308,8 @@ std::vector<int> program::run()
             break;
 
         case 99: //hault
+            this->game.print_score();
+
             iterator = intcode.size();
             return intcode;
 
@@ -254,7 +327,7 @@ int program::find(int const _iterator, int const _offset)
 {
     int const mode = int(intcode[valid_index(_iterator)] / (10 * pow(10, _offset))) % 10;
 
-    if (mode == 0)
+    if (mode == 0) // should be an enum
     {
         return intcode[valid_index(_iterator + _offset)];
     }

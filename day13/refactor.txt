@@ -1,4 +1,10 @@
+1. actor objects  
+2. unit tests
+3. metamorphic tests
+
 write OWL for this
 refactor 
-write some metamorphic tests
 
+research metamorphic testing c++
+
+what about value limits in c++?
